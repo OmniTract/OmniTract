@@ -1,0 +1,25 @@
+name: Origem do PR
+
+# Garante que a main só receba PRs vindos da branch develop deste repositório.
+# O job "Somente develop para main" é check obrigatório na proteção da main.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  somente-develop:
+    name: Somente develop para main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exigir que o PR venha de develop
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_REPO" != "$BASE_REPO" ] || [ "$HEAD_REF" != "develop" ]; then
+            echo "::error::Somente PRs da branch develop deste repositório podem ser mesclados em main (origem: $HEAD_REPO:$HEAD_REF)."
+            exit 1
+          fi
+          echo "Origem válida: develop."
